@@ -1,9 +1,12 @@
 package modelos
 
 import (
+	"api/src/seguranca"
 	"errors"
 	"strings"
 	"time"
+
+	"github.com/badoux/checkmail"
 )
 
 // Usuario representa um usuario na API
@@ -17,16 +20,18 @@ type Usuario struct {
 }
 
 // Chama os metodos para validar e formatar o usuario rececbido
-func (usuario *Usuario) Preparar() error {
-	if erro := usuario.validar(); erro != nil {
+func (usuario *Usuario) Preparar(etapa string) error {
+	if erro := usuario.validar(etapa); erro != nil {
 		return erro
 	}
 
-	usuario.formatar()
+	if erro := usuario.formatar(etapa); erro != nil {
+		return erro
+	}
 	return nil
 }
 
-func (usuario *Usuario) validar() error {
+func (usuario *Usuario) validar(etapa string) error {
 	if usuario.Nome == "" {
 		return errors.New("O Nome é obrigatorio e não pode estar em branco!")
 	}
@@ -36,16 +41,28 @@ func (usuario *Usuario) validar() error {
 	if usuario.Email == "" {
 		return errors.New("O Email é obrigatorio e não pode estar em branco!")
 	}
-	if usuario.Senha == "" {
+	if erro := checkmail.ValidateFormat(usuario.Email); erro != nil {
+		return errors.New("O email é invalidoo")
+	}
+	if etapa == "cadastro" && usuario.Senha == "" {
 		return errors.New("A Senha é obrigatorio e não pode estar em branco!")
 	}
 
 	return nil
 }
 
-func (usuario *Usuario) formatar() {
+func (usuario *Usuario) formatar(etapa string) error {
 	usuario.Nome = strings.TrimSpace(usuario.Nome)
 	usuario.Nick = strings.TrimSpace(usuario.Nick)
 	usuario.Email = strings.TrimSpace(usuario.Email)
+	if etapa == "cadastro" {
+		senhaComHash, erro := seguranca.Hash(usuario.Senha)
+		if erro != nil {
+			return erro
+		}
+		usuario.Senha = string(senhaComHash)
+	}
+
+	return nil
 
 }
