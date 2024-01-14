@@ -6,6 +6,7 @@ import (
 	"api/src/modelos"
 	"api/src/repositorios"
 	"api/src/respostas"
+	"api/src/seguranca"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -101,7 +102,6 @@ func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respostas.JSON(w, http.StatusOK, usuario)
-
 }
 
 // AtualizarUsuario altera as informaç~çoes de um usuario no banco
@@ -258,6 +258,119 @@ func UnfollowUsuario(w http.ResponseWriter, r *http.Request) {
 
 	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
 	if erro = repositorio.UnfollowUsuario(usuarioID, seguidorID); erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	respostas.JSON(w, http.StatusNoContent, nil)
+}
+
+// Traz todos os seguidores de um usuario
+func BuscarSeguidores(w http.ResponseWriter, r *http.Request) {
+	//Busca usuarioId que esta no parametro
+	parametros := mux.Vars(r)
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+	//Conecta no banco
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	seguidores, erro := repositorio.BuscarSeguidores(usuarioID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	respostas.JSON(w, http.StatusOK, seguidores)
+}
+
+// Traz todos os usuarios que um determinado usuario esta seguindo
+func BuscarSeguindo(w http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	usuarios, erro := repositorio.BuscarSeguindo(usuarioID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	respostas.JSON(w, http.StatusOK, usuarios)
+}
+
+// Atualiza senha de um usuario
+func AtualizarSenha(w http.ResponseWriter, r *http.Request) {
+	usuarioIDNoToken, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(w, http.StatusUnauthorized, erro)
+		return
+	}
+	// Pegar ddos que estão no parametro
+	parametros := mux.Vars(r)
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+	if usuarioIDNoToken != usuarioID {
+		respostas.Erro(w, http.StatusForbidden, errors.New("Não é possivel atualizar a senha de um usuario que não seja o seu"))
+		return
+	}
+	// Ler corpo da requisição
+	corporRequisicao, erro := ioutil.ReadAll(r.Body)
+
+	var senha modelos.Senha
+	if erro = json.Unmarshal(corporRequisicao, &senha); erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	senhaSalvaNoBanco, erro := repositorio.BuscarSenha(usuarioID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+	// Verificar se a senha do banco é a mesma enviado (hash)
+	if erro = seguranca.VerificarSenha(senhaSalvaNoBanco, senha.Atual); erro != nil {
+		respostas.Erro(w, http.StatusUnauthorized, errors.New("A senha atual não condiz com a que esta salva no banco"))
+		return
+	}
+	// Colocar hash na nova senha
+	senhaComHash, erro := seguranca.Hash(senha.Nova)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro)
+		return
+	}
+	// Vai no repositorio pegar a função para atualizar a senha
+	if erro = repositorio.AtualizarSenha(usuarioID, string(senhaComHash)); erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro)
 		return
 	}

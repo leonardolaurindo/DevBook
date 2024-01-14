@@ -49,4 +49,22 @@ var rotasUsuarios = []Rota{
 		Funcao:             controllers.UnfollowUsuario,
 		RequerAutenticacao: true,
 	},
+	{ // Buscar seguidores de um usuario
+		URI:                "/usuarios/{usuarioId}/seguidores",
+		Metodo:             http.MethodGet,
+		Funcao:             controllers.BuscarSeguidores,
+		RequerAutenticacao: true,
+	},
+	{ // Buscar usuarios que segue
+		URI:                "/usuarios/{usuarioId}/seguindo",
+		Metodo:             http.MethodGet,
+		Funcao:             controllers.BuscarSeguindo,
+		RequerAutenticacao: true,
+	},
+	{ // Atualizar senha de um usuario
+		URI:                "/usuarios/{usuarioId}/atualizar-senha",
+		Metodo:             http.MethodPost,
+		Funcao:             controllers.AtualizarSenha,
+		RequerAutenticacao: true,
+	},
 }
