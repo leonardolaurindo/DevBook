@@ -50,8 +50,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 	// se passou a senha esta correta
 
-	token, _ := autenticacao.CriarToken(usuarioSalvoNoBanco.ID)
-	fmt.Println(token)
+	token, erro := autenticacao.CriarToken(usuarioSalvoNoBanco.ID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
+
 	w.Write([]byte(token))
 
 }
