@@ -17,11 +17,13 @@ type Rota struct {
 // COnfigurar coloca todas as rotas dentro do router
 func Configurar(router *mux.Router) *mux.Router {
 	rotas := rotasLogin
+	rotas = append(rotas, rotasUsuario...)
 
 	for _, rota := range rotas {
 		router.HandleFunc(rota.URI, rota.Funcao).Methods(rota.Metodo)
 	}
 	// Aponta para o GO que os arquivos CSS e JS estão dentro da pasta assets
-	fileServer := http.FileServer(http.Dir("/assets/"))
+	fileServer := http.FileServer(http.Dir("./assets/"))
+	router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", fileServer))
 	return router
 }
