@@ -1,7 +1,7 @@
 $('#formulario-cadastro').on('submit', criarUsuario) // # procura um id
 
 
-function criarUsuario(evento){
+function criarUsuario(evento) {
     evento.preventDefault();
     console.log("Dentro da função usuario.");
 
@@ -18,5 +18,10 @@ function criarUsuario(evento){
             nick: $('#nick').val(),
             senha: $('#senha').val(),
         }
+    }).done(function () {
+        alert("Usuario cadastrado com sucesso!");
+    }).fail(function (erro) {
+        console.log(erro);
+        alert("Erro ao cadastrar usuario");
     });
 }
