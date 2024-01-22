@@ -1,15 +1,62 @@
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevBook - Página Principal</title>
-</head>
-<body>
-    <h2>Página Principal</h2>
-    {{ range . }}
-    <h4>Titulo: {{ .Titulo }}</h4>
-    <h4>Conteudo: {{ .Conteudo }}</h4>
-    <hr/>
-    {{ end }}
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>DevBook - Página Principal</title>
+        <link href="/assets/css/bootstrap.css" rel="stylesheet" />
+    </head>
+    <body>
+
+        {{ template "navbar"}}
+        <!-- START - NAVBAR -->
+
+        <!-- END - NAVBAR -->
+        <!-- START - PUBLICATIONS -->
+        <div class="container-fluid">
+            <div class="row mt-4">
+                <!-- Formulario de Publicações -->
+                <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5 col-xl-5">
+                    <h3>Nova Publicação</h3>
+                    <fieldset>
+                        <form action id="nova-publicacao">
+                            <div class="form-group">
+                                <label for="titulo">Titulo</label>
+                                <input type="text" class="form-control"
+                                    id="titulo" name="titulo"
+                                    required="required"
+                                    placeholder="Insira o Título da Publicação">
+                            </div>
+                            <div class="form-group">
+                                <label for="conteudo">Conteudo</label>
+                                <textarea class="form-control" name="conteudo"
+                                    id="conteudo"
+                                    placeholder="Insira o conteudo da publicação"></textarea>
+                            </div>
+                            <button class="btn btn-primary"
+                                type="submit">Publicar</button>
+                        </form>
+                    </fieldset>
+                </div>
+                <!-- Publicações -->
+                <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7 col-xl-7">
+                    {{ range .}}
+                    <div class="p-5 mb-4 bg-body-tertiary rounded-3">
+                        <div class="container-fluid py-5">
+                            <h1 class="display-5 fw-bold">{{ .Titulo}}</h1>
+                            <p class="col-md-12 fs-4">{{.Conteudo}}</p>
+                            <p><a href="#" class="text-secondary">{{
+                                    .AutorNick }} -</a> {{ .CriadaEm }}</p>
+                            <hr class="my-4">
+                            <p>Botões</p>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        <!-- END - PUBLICATIONS -->
+        {{ template "scripts"}}
+        {{ template "footer"}}
+
+    </body>
 </html>
