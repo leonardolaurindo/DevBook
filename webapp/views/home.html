@@ -39,15 +39,22 @@
                 </div>
                 <!-- Publicações -->
                 <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7 col-xl-7">
-                    {{ range .}}
+                    {{ range .Publicacoes}}
                     <div class="p-5 mb-4 bg-body-tertiary rounded-3">
                         <div class="container-fluid py-5">
                             <h1 class="display-5 fw-bold">{{ .Titulo}}</h1>
                             <p class="col-md-12 fs-4">{{.Conteudo}}</p>
                             <p><a href="#" class="text-secondary">{{
-                                    .AutorNick }} -</a> {{ .CriadaEm }}</p>
+                                    .AutorNick }}</a> - {{ .CriadaEm }}</p>
                             <hr class="my-4">
+
+                            {{ if (eq .AutorID $.UsuarioID) }}
+
+                            {{ else }}
+
+                            {{ end }}
                             <p>Botões</p>
+
                         </div>
                     </div>
                     {{end}}
@@ -55,8 +62,9 @@
             </div>
         </div>
         <!-- END - PUBLICATIONS -->
-        {{ template "scripts"}}
         {{ template "footer"}}
+        {{ template "scripts"}}
+        <script src="/assets/js/publicacoes.js"></script>
 
     </body>
 </html>
