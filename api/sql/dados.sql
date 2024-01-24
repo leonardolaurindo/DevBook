@@ -12,4 +12,6 @@ VALUES (1, 2),(2, 3),(3, 4),(4, 5),(5, 1);
 INSERT INTO publicacoes (titulo, conteudo, autor_id)
 VALUES("Publicação do Autor 1", "Essa é a publicacao do usuario 1", 1),
 ("Publicação do Autor 2", "Essa é a publicacao do usuario 2", 2),
-("Publicação do Autor 3", "Essa é a publicacao do usuario 3", 3);
+("Publicação do Autor 3", "Essa é a publicacao do usuario 3", 3),
+("Publicação do Autor 4", "Essa é a publicacao do usuario 4", 4),
+("Publicação do Autor 5", "Essa é a publicacao do usuario 5", 5);
