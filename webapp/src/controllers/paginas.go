@@ -11,6 +11,8 @@ import (
 	"webapp/src/requisicoes"
 	"webapp/src/respostas"
 	"webapp/src/utils"
+
+	"github.com/gorilla/mux"
 )
 
 // Carrega a tela de login
@@ -55,4 +57,39 @@ func CarregarPaginaPrincipal(w http.ResponseWriter, r *http.Request) {
 		Publicacoes: publicacoes,
 		UsuarioID:   usuarioID,
 	})
+}
+
+// Carrega pagina de edicao de publicacao
+func CarregarPaginaDeEdicao(w http.ResponseWriter, r *http.Request) {
+	//busca id no banco
+	//ler os parametros
+	parametros := mux.Vars(r)
+	//recebe o ID no parametro publicacaoID
+	publicacaoID, erro := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
+	if erro != nil {
+		respostas.JSON(w, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+	// cria a url
+	url := fmt.Sprintf("%s/publicacoes/%d", config.APIURL, publicacaoID)
+	//faz a requisicao
+	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodGet, url, nil)
+	if erro != nil {
+		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+
+	if response.StatusCode >= 400 {
+		respostas.TratarStatusCodeDeErro(w, response)
+		return
+	}
+
+	var publicacao modelos.Publicacao
+	if erro = json.NewDecoder(response.Body).Decode(&publicacao); erro != nil {
+		respostas.JSON(w, http.StatusUnprocessableEntity, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+	//se passar sem erro, joga a publicação na tela
+	utils.ExecutarTemplate(w, "atualizar-publicacao.html", publicacao)
+
 }
