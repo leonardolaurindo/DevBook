@@ -5,7 +5,7 @@ function fazerLogin(evento) {
 
     $.ajax({
         url: "/login",
-        method: "post",
+        method: "POST",
         data: {
             email: $('#email').val(),
             senha: $('#senha').val(),
@@ -13,6 +13,6 @@ function fazerLogin(evento) {
     }).done(function () {
         window.location = "/home";
     }).fail(function () {
-        alert("Usuário ou senha inválidos!");
+        Swal.fire("Ops...", "Usuario ou senha incorretos", "error")
     });
 }

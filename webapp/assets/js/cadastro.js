@@ -6,7 +6,7 @@ function criarUsuario(evento) {
     console.log("Dentro da função usuario.");
 
     if ($('#senha').val() != $('#confirmar-senha').val()) {
-        alert("As senhas não coincidem");
+        Swal.fire("Ops....", "As senhas não coincidem!", "error")
         return
     }
     $.ajax({
@@ -19,9 +19,23 @@ function criarUsuario(evento) {
             senha: $('#senha').val(),
         }
     }).done(function () {
-        alert("Usuario cadastrado com sucesso!");
+        Swal.fire("Sucesso!", "Usuario cadastrado com sucesso", "success")
+            .then(function () {
+                $.ajax({
+                    url: "/login",
+                    method: "POST",
+                    data: {
+                        email: $('#email').val(),
+                        senha: $('#senha').val()
+                    }
+                }).done(function () {
+                    window.location = "/home";
+                }).fail(function () {
+                    Swal.fire("Ops...!", "Erro ao autenticar o usuario", "error")
+                })
+            })
     }).fail(function (erro) {
         console.log(erro);
-        alert("Erro ao cadastrar usuario");
+        Swal.fire("Erro", "Erro ao cadastrar o usuario", "error")
     });
 }
